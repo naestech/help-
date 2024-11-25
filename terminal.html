@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>terminal</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .prompt {
+            margin-bottom: 20px;
+            min-height: 1.6em;
+        }
+
+        .prompt::before {
+            content: ">";
+            margin-right: 10px;
+        }
+
+        .hostname {
+            margin-bottom: 20px;
+        }
+
+        .list-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding-left: 25px;
+            max-width: 900px;
+            margin: 0 auto 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Add blinking cursor effect */
+        .cursor::after {
+            content: "█";
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+
+    <script>
+        const messages = [
+            { type: 'prompt', text: 'help' },
+            { type: 'hostname', text: 'naes.tech@macbook ~' },
+            { type: 'prompt', text: "i'm a..." },
+            { type: 'list', items: [
+                'activist', 'artist', 'entrepreneur', 'existentialist', 'fast food connoisseur',
+                'hacker', 'lover', 'lurker', 'mad scientist', 'musician',
+                'nerd', 'overthinker', 'teacher', 'traveller', 'writer', '???'
+            ]},
+            { type: 'hostname', text: 'naes.tech@macbook ~' },
+            { type: 'prompt', text: 'stuck in the body of a software engineer!' }
+        ];
+
+        const terminal = document.getElementById('terminal');
+        let messageIndex = 0;
+        let charIndex = 0;
+
+        const TYPING_SPEED = 100;  // Increased to 100ms to make typing more visible
+        const MESSAGE_DELAY = 500;
+
+        function addHostname() {
+            const hostname = document.createElement('div');
+            hostname.className = 'hostname';
+            hostname.textContent = 'naes.tech@macbook ~';
+            terminal.appendChild(hostname);
+        }
+
+        function typeWriter() {
+            if (messageIndex < messages.length) {
+                const message = messages[messageIndex];
+                
+                if (message.type === 'list') {
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'list-items';
+                    message.items.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.textContent = item;
+                        listDiv.appendChild(itemDiv);
+                    });
+                    terminal.appendChild(listDiv);
+                    messageIndex++;
+                    setTimeout(typeWriter, MESSAGE_DELAY);
+                } else if (message.type === 'hostname') {
+                    addHostname();
+                    messageIndex++;
+                    typeWriter();
+                } else {
+                    if (charIndex === 0) {
+                        const div = document.createElement('div');
+                        div.className = 'prompt';
+                        if (messageIndex === messages.length - 1) div.classList.add('cursor');
+                        terminal.appendChild(div);
+                    }
+
+                    const currentDiv = terminal.lastElementChild;
+                    currentDiv.textContent = message.text.substring(0, charIndex + 1);
+                    charIndex++;
+
+                    if (charIndex < message.text.length) {
+                        setTimeout(typeWriter, TYPING_SPEED);
+                    } else {
+                        charIndex = 0;
+                        messageIndex++;
+                        setTimeout(typeWriter, MESSAGE_DELAY);
+                    }
+                }
+            }
+        }
+
+        // Add initial hostname before starting the animation
+        window.onload = () => {
+            addHostname();
+            typeWriter();
+        };
+    </script>
+</body>
+</html> 
