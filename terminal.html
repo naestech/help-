@@ -38,7 +38,6 @@
             display: none;
         }
 
-        /* Add blinking cursor effect */
         .cursor::after {
             content: "█";
             animation: blink 1s infinite;
@@ -54,23 +53,23 @@
 
     <script>
         const messages = [
-            { type: 'prompt', text: 'help' },
+            { type: 'prompt', text: 'help', showCursor: true },
             { type: 'hostname', text: 'naes.tech@macbook ~' },
-            { type: 'prompt', text: "i'm a..." },
+            { type: 'prompt', text: "i'm a...", showCursor: true },
             { type: 'list', items: [
                 'activist', 'artist', 'entrepreneur', 'existentialist', 'fast food connoisseur',
                 'hacker', 'lover', 'lurker', 'mad scientist', 'musician',
                 'nerd', 'overthinker', 'teacher', 'traveller', 'writer', '???'
             ]},
             { type: 'hostname', text: 'naes.tech@macbook ~' },
-            { type: 'prompt', text: 'stuck in the body of a software engineer!' }
+            { type: 'prompt', text: 'stuck in the body of a software engineer!', showCursor: true }
         ];
 
         const terminal = document.getElementById('terminal');
         let messageIndex = 0;
         let charIndex = 0;
 
-        const TYPING_SPEED = 100;  // Increased to 100ms to make typing more visible
+        const TYPING_SPEED = 100;
         const MESSAGE_DELAY = 500;
 
         function addHostname() {
@@ -80,11 +79,19 @@
             terminal.appendChild(hostname);
         }
 
+        function removePreviousCursor() {
+            const elements = terminal.getElementsByClassName('cursor');
+            for (let element of elements) {
+                element.classList.remove('cursor');
+            }
+        }
+
         function typeWriter() {
             if (messageIndex < messages.length) {
                 const message = messages[messageIndex];
                 
                 if (message.type === 'list') {
+                    removePreviousCursor();
                     const listDiv = document.createElement('div');
                     listDiv.className = 'list-items';
                     message.items.forEach(item => {
@@ -96,14 +103,16 @@
                     messageIndex++;
                     setTimeout(typeWriter, MESSAGE_DELAY);
                 } else if (message.type === 'hostname') {
+                    removePreviousCursor();
                     addHostname();
                     messageIndex++;
                     typeWriter();
                 } else {
                     if (charIndex === 0) {
+                        removePreviousCursor();
                         const div = document.createElement('div');
                         div.className = 'prompt';
-                        if (messageIndex === messages.length - 1) div.classList.add('cursor');
+                        if (message.showCursor) div.classList.add('cursor');
                         terminal.appendChild(div);
                     }
 
@@ -122,10 +131,9 @@
             }
         }
 
-        // Add initial hostname before starting the animation
         window.onload = () => {
             addHostname();
-            typeWriter();
+            setTimeout(typeWriter, 1000);
         };
     </script>
 </body>
